@@ -73,6 +73,8 @@ func (s *Scanner) scanToken() {
 		} else {
 			s.addToken(createSimpleToken(SLASH, "/"))
 		}
+	default:
+		ErrorUnexpectedCharacter(s.line, string(c))
 	}
 
 }
