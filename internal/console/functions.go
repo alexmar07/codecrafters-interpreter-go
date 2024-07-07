@@ -1,10 +1,25 @@
 package console
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+
+	"github.com/codecrafters-io/interpreter-starter-go/internal/handlers"
+)
 
 func tokenize(args []string) {
 
-	x := args[1]
+	buffer, err := os.ReadFile(args[0])
 
-	fmt.Println(x)
+	if err != nil {
+		panic(err)
+	}
+
+	s := handlers.NewScanner(string(buffer))
+
+	tokens := s.ScanTokens()
+
+	for _, t := range tokens {
+		fmt.Println(t.ToString())
+	}
 }

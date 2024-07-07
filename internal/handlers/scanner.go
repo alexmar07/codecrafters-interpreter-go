@@ -17,14 +17,14 @@ func NewScanner(source string) *Scanner {
 	}
 }
 
-func (s *Scanner) scanTokens() []*Token {
+func (s *Scanner) ScanTokens() []*Token {
 
 	for !s.isEndAt() {
 		s.start = s.current
-
+		s.scanToken()
 	}
 
-	s.addToken(NewToken(NewTokenType(EOF), nil, nil, &s.line))
+	s.addToken(NewToken(NewTokenType(EOF), "", nil, &s.line))
 
 	return s.tokens
 }
@@ -37,45 +37,62 @@ func (s *Scanner) scanToken() {
 
 	switch string(c) {
 	case "(":
-		s.addToken(createSimpleToken(LEFT_PAREN))
+		s.addToken(createSimpleToken(LEFT_PAREN, "("))
 	case ")":
-		s.addToken(createSimpleToken(RIGHT_PAREN))
+		s.addToken(createSimpleToken(RIGHT_PAREN, ")"))
 	case "{":
-		s.addToken(createSimpleToken(LEFT_BRACE))
+		s.addToken(createSimpleToken(LEFT_BRACE, "{"))
 	case "}":
-		s.addToken(createSimpleToken(RIGHT_BRACE))
+		s.addToken(createSimpleToken(RIGHT_BRACE, "}"))
 	case ",":
-		s.addToken(createSimpleToken(COMMA))
+		s.addToken(createSimpleToken(COMMA, ","))
 	case ".":
-		s.addToken(createSimpleToken(DOT))
+		s.addToken(createSimpleToken(DOT, "."))
 	case "-":
-		s.addToken(createSimpleToken(MINUS))
+		s.addToken(createSimpleToken(MINUS, "-"))
 	case "+":
-		s.addToken(createSimpleToken(PLUS))
+		s.addToken(createSimpleToken(PLUS, "+"))
 	case ";":
-		s.addToken(createSimpleToken(SEMICOLON))
-	case "/":
-		s.addToken(createSimpleToken(SLASH))
+		s.addToken(createSimpleToken(SEMICOLON, ";"))
 	case "*":
-		s.addToken(createSimpleToken(STAR))
+		s.addToken(createSimpleToken(STAR, "*"))
 	case "!":
-		s.addTokenWithTwoChars(BANG, BANG_EQUAL)
+		s.addTokenWithTwoChars("!", BANG, BANG_EQUAL)
 	case "=":
-		s.addTokenWithTwoChars(EQUAL, EQUAL_EQUAL)
+		s.addTokenWithTwoChars("=", EQUAL, EQUAL_EQUAL)
 	case "<":
-		s.addTokenWithTwoChars(LESS, LESS_EQUAL)
+		s.addTokenWithTwoChars("<", LESS, LESS_EQUAL)
 	case ">":
-		s.addTokenWithTwoChars(GREATER, GREATER_EQUAL)
+		s.addTokenWithTwoChars(">", GREATER, GREATER_EQUAL)
+	case "/":
+		// Gestisce i commenti
+		if s.checkNextChar("/") {
+			for s.peek() != "\n" && s.isEndAt() {
+				s.current++
+			}
+		} else {
+			s.addToken(createSimpleToken(SLASH, "/"))
+		}
 	}
 
 }
 
-func (s *Scanner) addTokenWithTwoChars(oneCharOption string, twoCharsOption string) {
+func (s *Scanner) peek() string {
+
+	if s.isEndAt() {
+		return "\\0"
+	}
+
+	return string(s.source[s.current])
+
+}
+
+func (s *Scanner) addTokenWithTwoChars(c string, oneCharOption string, twoCharsOption string) {
 
 	if s.checkNextChar("=") {
-		s.addToken(createSimpleToken(twoCharsOption))
+		s.addToken(createSimpleToken(twoCharsOption, c+"="))
 	} else {
-		s.addToken(createSimpleToken(oneCharOption))
+		s.addToken(createSimpleToken(oneCharOption, c))
 	}
 
 }
@@ -95,8 +112,8 @@ func (s *Scanner) checkNextChar(c string) bool {
 	return true
 }
 
-func createSimpleToken(tokenType string) *Token {
-	return NewToken(NewTokenType(tokenType), nil, nil, nil)
+func createSimpleToken(tokenType string, lexeme string) *Token {
+	return NewToken(NewTokenType(tokenType), lexeme, nil, nil)
 }
 
 func (s *Scanner) addToken(t *Token) {
