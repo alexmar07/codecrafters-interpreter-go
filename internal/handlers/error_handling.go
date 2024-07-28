@@ -1,7 +1,10 @@
 package handlers
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func ErrorUnexpectedCharacter(line int, c string) {
-	fmt.Printf("[line %d] Error: Unexpected character: %s\n", line, c)
+	fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line, c)
 }

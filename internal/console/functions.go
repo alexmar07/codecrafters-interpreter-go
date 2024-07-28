@@ -22,4 +22,8 @@ func tokenize(args []string) {
 	for _, t := range tokens {
 		fmt.Println(t.ToString())
 	}
+
+	if s.HasErrors {
+		os.Exit(65)
+	}
 }

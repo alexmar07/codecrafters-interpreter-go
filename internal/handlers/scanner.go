@@ -1,19 +1,21 @@
 package handlers
 
 type Scanner struct {
-	source  string
-	tokens  []*Token
-	current int
-	start   int
-	line    int
+	source    string
+	tokens    []*Token
+	current   int
+	start     int
+	line      int
+	HasErrors bool
 }
 
 func NewScanner(source string) *Scanner {
 	return &Scanner{
-		source:  source,
-		current: 0,
-		start:   0,
-		line:    1,
+		source:    source,
+		current:   0,
+		start:     0,
+		line:      1,
+		HasErrors: false,
 	}
 }
 
@@ -75,6 +77,8 @@ func (s *Scanner) scanToken() {
 		}
 	default:
 		ErrorUnexpectedCharacter(s.line, string(c))
+
+		s.HasErrors = true
 	}
 
 }
