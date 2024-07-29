@@ -69,7 +69,7 @@ func (s *Scanner) scanToken() {
 	case "/":
 		// Gestisce i commenti
 		if s.checkNextChar("/") {
-			for s.peek() != "\n" && s.isEndAt() {
+			for s.peek() != "\n" && !s.isEndAt() {
 				s.current++
 			}
 		} else {
