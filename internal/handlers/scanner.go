@@ -80,6 +80,8 @@ func (s *Scanner) scanToken() {
 	case "\r":
 	case "\n":
 		s.line++
+	case "\"":
+		s.detectString()
 	default:
 		ErrorUnexpectedCharacter(s.line, string(c))
 
@@ -96,6 +98,30 @@ func (s *Scanner) peek() string {
 
 	return string(s.source[s.current])
 
+}
+
+func (s *Scanner) detectString() {
+
+	for s.peek() != "\"" && !s.isEndAt() {
+		if s.peek() == "\n" {
+			s.line++
+		}
+
+		s.current++
+	}
+
+	if s.isEndAt() {
+		UnterminatedString(s.line)
+		s.HasErrors = true
+		return
+	}
+
+	s.current++
+
+	str := s.source[s.start:s.current]
+	value := s.source[s.start+1 : s.current-1]
+
+	s.addToken(createTokenWithValue(STRING, str, value))
 }
 
 func (s *Scanner) addTokenWithTwoChars(c string, oneCharOption string, twoCharsOption string) {
@@ -125,6 +151,10 @@ func (s *Scanner) checkNextChar(c string) bool {
 
 func createSimpleToken(tokenType string, lexeme string) *Token {
 	return NewToken(NewTokenType(tokenType), lexeme, nil, nil)
+}
+
+func createTokenWithValue(tokenType string, lexeme string, literal string) *Token {
+	return NewToken(NewTokenType(tokenType), lexeme, literal, nil)
 }
 
 func (s *Scanner) addToken(t *Token) {

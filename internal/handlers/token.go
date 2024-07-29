@@ -26,7 +26,7 @@ const (
 
 	// Literals
 	IDENTIFIER = ""
-	STRING     = ""
+	STRING     = "STRING"
 	NUMBER     = ""
 
 	// Keywords

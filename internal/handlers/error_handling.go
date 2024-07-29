@@ -6,5 +6,13 @@ import (
 )
 
 func ErrorUnexpectedCharacter(line int, c string) {
-	fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line, c)
+	genericError(line, fmt.Sprintf("Unexpected character: %s", c))
+}
+
+func UnterminatedString(line int) {
+	genericError(line, "Unterminated string.")
+}
+
+func genericError(line int, err string) {
+	fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", line, err)
 }
