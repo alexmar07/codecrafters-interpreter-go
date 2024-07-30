@@ -1,5 +1,11 @@
 package handlers
 
+import (
+	"strconv"
+	"strings"
+	"unicode"
+)
+
 type Scanner struct {
 	source    string
 	tokens    []*Token
@@ -83,9 +89,14 @@ func (s *Scanner) scanToken() {
 	case "\"":
 		s.detectString()
 	default:
-		ErrorUnexpectedCharacter(s.line, string(c))
 
-		s.HasErrors = true
+		if isDigit(string(c)) {
+			s.detectNumber()
+		} else {
+			ErrorUnexpectedCharacter(s.line, string(c))
+			s.HasErrors = true
+		}
+
 	}
 
 }
@@ -124,6 +135,46 @@ func (s *Scanner) detectString() {
 	s.addToken(createTokenWithValue(STRING, str, value))
 }
 
+func (s *Scanner) detectNumber() {
+
+	for isDigit(s.peek()) {
+		s.current++
+	}
+
+	if s.peek() == "." && isDigit(s.peekNext()) {
+		s.current++
+	}
+
+	for isDigit(s.peek()) {
+		s.current++
+	}
+
+	num := s.source[s.start:s.current]
+
+	var value string
+
+	fp, _ := strconv.ParseFloat(num, 64)
+
+	values := strings.Split(num, ".")
+
+	if len(values) == 1 {
+		value = strconv.FormatFloat(fp, 'f', 1, 64)
+	} else {
+		value = num
+	}
+
+	s.addToken(createTokenWithValue(NUMBER, num, value))
+}
+
+func (s *Scanner) peekNext() string {
+
+	if s.current+1 >= len(s.source) {
+		return "\\0"
+	}
+
+	return string(s.source[s.current+1])
+}
+
 func (s *Scanner) addTokenWithTwoChars(c string, oneCharOption string, twoCharsOption string) {
 
 	if s.checkNextChar("=") {
@@ -149,18 +200,19 @@ func (s *Scanner) checkNextChar(c string) bool {
 	return true
 }
 
-func createSimpleToken(tokenType string, lexeme string) *Token {
-	return NewToken(NewTokenType(tokenType), lexeme, nil, nil)
-}
-
-func createTokenWithValue(tokenType string, lexeme string, literal string) *Token {
-	return NewToken(NewTokenType(tokenType), lexeme, literal, nil)
-}
-
 func (s *Scanner) addToken(t *Token) {
 	s.tokens = append(s.tokens, t)
 }
 
 func (s Scanner) isEndAt() bool {
 	return s.current >= len(s.source)
+}
+
+func isDigit(s string) bool {
+	for _, c := range s {
+		if !unicode.IsDigit(c) {
+			return false
+		}
+	}
+	return true
 }

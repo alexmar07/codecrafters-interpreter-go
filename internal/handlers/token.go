@@ -27,7 +27,7 @@ const (
 	// Literals
 	IDENTIFIER = ""
 	STRING     = "STRING"
-	NUMBER     = ""
+	NUMBER     = "NUMBER"
 
 	// Keywords
 	AND    = ""
@@ -89,4 +89,12 @@ func NewTokenType(value string) *TokenType {
 
 func (tt *TokenType) GetValue() string {
 	return tt.value
+}
+
+func createSimpleToken(tokenType string, lexeme string) *Token {
+	return NewToken(NewTokenType(tokenType), lexeme, nil, nil)
+}
+
+func createTokenWithValue(tokenType string, lexeme string, literal interface{}) *Token {
+	return NewToken(NewTokenType(tokenType), lexeme, literal, nil)
 }
